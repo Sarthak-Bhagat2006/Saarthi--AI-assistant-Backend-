@@ -11,7 +11,10 @@ const PORT = 8080;
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://saarthi-ai-assistant-frontend.vercel.app/',
+    credentials: true,
+}));
 
 // Routes
 app.use('/api', chatRoutes);
