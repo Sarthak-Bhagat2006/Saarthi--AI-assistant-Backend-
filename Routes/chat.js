@@ -1,7 +1,7 @@
 import express from 'express';
 import Thread from '../Models/Thread.js';
 import getAPIResponce from '../Utils/apiResponce.js';
-import { authMiddleware, authorize } from "../Utils/authMiddleware.js";
+import { authMiddleware } from "../Utils/authMiddleware.js";
 
 const router = express.Router();
 

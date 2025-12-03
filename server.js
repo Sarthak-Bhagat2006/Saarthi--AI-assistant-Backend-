@@ -14,18 +14,23 @@ const PORT = process.env.PORT || 8080;
 app.use(express.json());
 
 // CORS
-const allowedOrigins = [
 
-    'https://saarthi-ai-assistant-frontend.vercel.app',
-    'https://saarthi-ai-assistant-frontend.vercel.app/',
+const allowedOrigins = [
+    "https://saarthi-ai-assistant-frontend.vercel.app", // production frontend
+    "http://localhost:3000" // local frontend
 ];
 
-app.use(
-    cors({
-        origin: "https://saarthi-ai-assistant-frontend.vercel.app",
-        credentials: true,
-    })
-);
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true); // allow tools like Postman
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = "CORS blocked: Origin not allowed";
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true // required if you use cookies/session
+}));
 
 // Routes
 app.use('/api/auth', registerRoutes);
