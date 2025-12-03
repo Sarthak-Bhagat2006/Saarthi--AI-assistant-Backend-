@@ -69,7 +69,7 @@ router.get("/thread/:threadId", authMiddleware, async (req, res) => {
 
         res.json(thread.messages);
     } catch (error) {
-        console.log(err);
+        console.log(error);
         res.status(500).json({ error: " Failed to fetch threads " });
     }
 });
