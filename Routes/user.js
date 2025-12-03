@@ -34,13 +34,14 @@ router.post("/signUp", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
-
+        console.log(token);
         return res.status(201).json({
             success: true,
             user,
             token,
         });
     } catch (error) {
+        console.log(error);
         return res.status(400).json({
             success: false,
             message: error.message,

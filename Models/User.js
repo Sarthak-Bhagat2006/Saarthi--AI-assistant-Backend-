@@ -12,20 +12,15 @@ const UserSchema = new mongoose.Schema(
 );
 
 // hash password before save
-UserSchema.pre("save", async function (next) {
-    try {
-        // Skip if no password (guest user or other cases)
-        if (!this.password) return next();
+UserSchema.pre("save", async function () {
+    // Skip if no password
+    if (!this.password) return;
 
-        // Skip if password unchanged
-        if (!this.isModified("password")) return next();
+    // Skip if password unchanged
+    if (!this.isModified("password")) return;
 
-        // Hash password
-        this.password = await bcrypt.hash(this.password, 10);
-        next();
-    } catch (err) {
-        next(err);
-    }
+    // Hash password
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
 
