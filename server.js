@@ -33,8 +33,8 @@ app.use(cors({
 }));
 
 // Routes
-app.use('/api', chatRoutes);
 app.use('/api/auth', registerRoutes);
+app.use('/api', chatRoutes);
 
 // MongoDB Connection
 const MONGO_URL = process.env.MONGO_URL;
