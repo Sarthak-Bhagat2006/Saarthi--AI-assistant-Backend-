@@ -15,7 +15,9 @@ app.use(express.json());
 
 // CORS
 const allowedOrigins = [
-    'https://saarthi-ai-assistant-frontend.vercel.app' // no trailing slash
+
+    'https://saarthi-ai-assistant-frontend.vercel.app',
+    'https://saarthi-ai-assistant-frontend.vercel.app/',
 ];
 
 app.use(cors({
