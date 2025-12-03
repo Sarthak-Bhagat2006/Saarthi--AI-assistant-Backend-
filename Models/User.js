@@ -13,10 +13,21 @@ const UserSchema = new mongoose.Schema(
 
 // hash password before save
 UserSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+    try {
+        // Skip if no password (guest user or other cases)
+        if (!this.password) return next();
+
+        // Skip if password unchanged
+        if (!this.isModified("password")) return next();
+
+        // Hash password
+        this.password = await bcrypt.hash(this.password, 10);
+        next();
+    } catch (err) {
+        next(err);
+    }
 });
+
 
 // method to compare password
 UserSchema.methods.comparePassword = async function (candidatePassword) {
