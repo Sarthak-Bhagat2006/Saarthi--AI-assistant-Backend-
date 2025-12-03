@@ -14,7 +14,7 @@ app.use(express.json());
 // Allow frontend origins
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://saarthi-ai-assistant-frontend.vercel.app"
+    "https://saarthi-ai-assistant-frontend-ox5qskg8z.vercel.app/"
 ];
 
 app.use(cors({
