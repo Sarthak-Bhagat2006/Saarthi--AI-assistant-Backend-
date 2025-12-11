@@ -5,25 +5,8 @@ import { authMiddleware } from "../Utils/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/thunder", async (req, res) => {
-    try {
-        const { message } = req.body;
-
-        if (!message) {
-            return res.status(400).json({ error: "Message is required" });
-        }
-
-        const aiResponse = await getAPIResponce(message);
-
-        res.status(200).json({
-            message: "AI responded successfully",
-            data: aiResponse
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: "Failed to get AI response" });
-    }
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "OK" });
 });
 
 //test
