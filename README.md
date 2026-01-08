@@ -2,7 +2,7 @@
 # Saarthi AI Assistant
 ## 🔗 Live Demo
 
-👉 [https://Saarthi-Live.com](https://charge-hub-delta.vercel.app/listings)
+👉 [https://Saarthi-Live.com](https://saarthi-ai-assistant-frontend.vercel.app/#/)
 
 <img width="1440" height="900" alt="Screenshot 2026-01-08 at 5 48 27 PM" src="https://github.com/user-attachments/assets/6a3e9ee1-21aa-426d-8688-24cc7564e21a" />
 
