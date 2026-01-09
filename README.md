@@ -1,6 +1,6 @@
 
 # Saarthi AI Assistant
-## 🔗 Live Demo
+## Live Demo
 
 👉 [https://Saarthi-Live.com](https://saarthi-ai-assistant-frontend.vercel.app/#/)
 
@@ -18,9 +18,6 @@ Core features are implemented and working. Further enhancements and optimisation
 ## ✨ Features
 
 - 🔐 **Authentication & Authorization** – Secure login and registration with JWT and Passport.js.  
-- 👥 **Mentor-Student Connections** – Manage mentors, students, and group memberships.  
-- 🗂️ **Group Management** – Create, update, and manage public/private groups.  
-- 📝 **Request Handling** – Approve or reject student requests to join groups.  
 - 🤖 **AI Integration** – Forward prompts to Gemma-3N (OpenRouter API) and handle contextual responses.  
 - 📊 **Data Management** – MongoDB schemas for users, groups, and chat threads storing 5k+ messages.  
 
