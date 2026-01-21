@@ -9,8 +9,13 @@ const router = express.Router();
 // SIGN UP
 router.post("/signUp", async (req, res) => {
     const { username, email, password } = req.body;
-    console.log("SIGNUP ROUTE HIT ✔️");
-    console.log("Signup request body:", req.body);
+
+    if (!username || !email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "Username, email, and password are required"
+        });
+    }
 
     try {
         const isUser = await User.findOne({ email });
@@ -52,6 +57,12 @@ router.post("/signUp", async (req, res) => {
 // LOGIN
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: "email, password required"
+        });
+    }
 
     try {
         const user = await User.findOne({ email });
