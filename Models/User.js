@@ -3,10 +3,34 @@ import bcrypt from 'bcrypt';
 
 const UserSchema = new mongoose.Schema(
     {
-        username: { type: String },
-        email: { type: String, unique: true, sparse: true }, // optional for guests
-        password: { type: String }, // only for registered users
-        role: { type: String, enum: ["guest", "user"], default: "guest" },
+        username: {
+            type: String,
+            required: true,
+            trim: true
+        },
+
+        email: {
+            type: String,
+            unique: true,
+            sparse: true, // allows multiple guests with no email
+            required: function () {
+                return this.role === "user";
+            }
+        },
+
+        password: {
+            type: String,
+            required: function () {
+                return this.role === "user";
+            },
+            minlength: [8, "Password must be at least 8 characters long"]
+        },
+
+        role: {
+            type: String,
+            enum: ["guest", "user"],
+            default: "guest"
+        }
     },
     { timestamps: true }
 );
