@@ -41,7 +41,7 @@ Core features are implemented and working. Further enhancements and optimisation
 
 ## 🤝 How to Contribute
 
-Contributions are welcome! If you’d like to improve **ChargeHub**, you can follow the steps below 🚀
+Contributions are welcome! If you’d like to improve **ModernMentor**, you can follow the steps below 🚀
 
 ```bash
 # Fork the repository on GitHub, then clone your fork
