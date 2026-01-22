@@ -46,7 +46,6 @@ Contributions are welcome! If you’d like to improve **ChargeHub**, you can fol
 ```bash
 # Fork the repository on GitHub, then clone your fork
 git clone <url>
-cd ChargeHub
 
 # Install dependencies
 npm install
