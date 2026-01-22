@@ -39,11 +39,25 @@ Core features are implemented and working. Further enhancements and optimisation
 - Git & GitHub  
  
 
-## 🤝 Contributing
+## 🤝 How to Contribute
 
-We welcome contributions! Please follow these steps:  
-1. Fork the repository.  
-2. Create a new branch (`feature-branch`).  
-3. Commit your changes.  
-4. Push to your fork and submit a pull request.  
+Contributions are welcome! If you’d like to improve **ChargeHub**, you can follow the steps below 🚀
 
+```bash
+# Fork the repository on GitHub, then clone your fork
+git clone <url>
+cd ChargeHub
+
+# Install dependencies
+npm install
+
+# Run the project locally
+nodemon server.js
+
+# Create a new branch for your changes
+git checkout -b feature/your-feature-name
+
+# Commit and push your changes
+git add .
+git commit -m "Describe your change"
+git push origin feature/your-feature-name
