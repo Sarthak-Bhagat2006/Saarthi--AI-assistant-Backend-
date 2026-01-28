@@ -1,50 +1,41 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
-const UserSchema = new mongoose.Schema(
-    {
-        username: {
-            type: String,
-            required: true,
-            trim: true
-        },
-
-        email: {
-            type: String,
-            unique: true,
-            sparse: true, // allows multiple guests with no email
-            required: function () {
-                return this.role === "user";
-            }
-        },
-
-        password: {
-            type: String,
-            required: function () {
-                return this.role === "user";
-            },
-            minlength: [8, "Password must be at least 8 characters long"]
-        },
-
-        role: {
-            type: String,
-            enum: ["guest", "user"],
-            default: "guest"
-        }
+const UserSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        trim: true,
     },
-    { timestamps: true }
-);
 
-// hash password before save
-UserSchema.pre("save", async function () {
-    // Skip if no password
-    if (!this.password) return;
+    email: {
+        type: String,
+        unique: true,
+        sparse: true,
+        required: function () {
+            return this.authProvider !== "guest";
+        },
+    },
 
-    // Skip if password unchanged
-    if (!this.isModified("password")) return;
+    password: {
+        type: String,
+        required: function () {
+            return this.authProvider === "local";
+        },
+        minlength: 8,
+    },
 
-    // Hash password
-    this.password = await bcrypt.hash(this.password, 10);
+    authProvider: {
+        type: String,
+        enum: ["local", "google", "guest"],
+        default: "guest",
+    },
+
+    role: {
+        type: String,
+        enum: ["guest", "user"],
+        default: "guest",
+    },
 });
 
 
