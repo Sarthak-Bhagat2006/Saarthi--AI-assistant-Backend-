@@ -4,8 +4,10 @@
 
 👉 [https://Saarthi-Live.com](https://saarthi-ai-assistant-frontend.vercel.app/#/)
 
-<img width="1440" height="900" alt="Screenshot 2026-01-08 at 5 48 27 PM" src="https://github.com/user-attachments/assets/6a3e9ee1-21aa-426d-8688-24cc7564e21a" />
+<img width="1000" height="900" alt="Screenshot 2026-01-08 at 5 48 27 PM" src="https://github.com/user-attachments/assets/6a3e9ee1-21aa-426d-8688-24cc7564e21a" />
 
+## Saarthi Architecture
+<img width="950" height="650" alt="Screenshot 2026-01-30 at 12 16 46 AM" src="https://github.com/user-attachments/assets/04483cf4-1c3a-4523-8f47-a7c009de40ff" /> 
 
 **Saarthi Backend** is the server-side application powering the Saarthi AI Assistant platform. It handles authentication, chat messages, and AI-powered interactions using Gemma-3N. Built with scalability and security in mind, the backend ensures smooth operations for real-time and AI-assisted tasks.
 
