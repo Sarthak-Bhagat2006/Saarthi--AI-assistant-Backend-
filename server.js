@@ -40,9 +40,11 @@ app.post('/auth/guest', (req, res) => {
 
 // MongoDB Connection
 const MONGO_URL = process.env.MONGO_URL;
+
 const connectDB = async () => {
     try {
         await mongoose.connect(MONGO_URL);
+
         console.log("Connected to DB");
     } catch (error) {
         console.log("Failed to connect", error);
