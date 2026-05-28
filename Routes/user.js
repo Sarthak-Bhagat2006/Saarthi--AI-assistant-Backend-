@@ -280,6 +280,7 @@ router.post("/forgot-password", async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
+        console.log("MAIL SENT SUCCESSFULLY");
 
         return res.status(200).json({
             success: true,
