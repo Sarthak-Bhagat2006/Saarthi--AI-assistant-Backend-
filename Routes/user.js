@@ -228,112 +228,114 @@ router.post("/google", async (req, res) => {
         });
     }
 
-    router.post("/forgot-password", async (req, res) => {
-        const { email } = req.body;
-
-        try {
-            const user = await User.findOne({ email });
-
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: "User not found",
-                });
-            }
-
-            // Generate random token
-            const resetToken = crypto.randomBytes(32).toString("hex");
-
-            // Save token + expiry in DB
-            user.resetPasswordToken = resetToken;
-
-            user.resetPasswordExpire =
-                Date.now() + 15 * 60 * 1000; // 15 mins
-
-            await user.save();
-
-            // Reset URL
-            const resetURL =
-                `http://localhost:5173/reset-password/${resetToken}`;
-
-            // Nodemailer transporter
-            const transporter = nodemailer.createTransport({
-                service: "gmail",
-                auth: {
-                    user: process.env.EMAIL,
-                    pass: process.env.EMAIL_PASSWORD,
-                },
-            });
-
-            // Mail options
-            const mailOptions = {
-                from: process.env.EMAIL,
-                to: user.email,
-                subject: "Password Reset",
-                html: `
-                    <h2>Password Reset</h2>
-                    <p>Click below link to reset password:</p>
-                    <a href="${resetURL}">${resetURL}</a>
-                `,
-            };
-
-            await transporter.sendMail(mailOptions);
-
-            return res.status(200).json({
-                success: true,
-                message: "Reset email sent",
-            });
-
-        } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-    });
-
-
-    router.post("/reset-password/:token", async (req, res) => {
-
-        const { token } = req.params;
-
-        const { password } = req.body;
-
-        try {
-
-            const user = await User.findOne({
-                resetPasswordToken: token,
-                resetPasswordExpire: { $gt: Date.now() },
-            });
-
-            if (!user) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid or expired token",
-                });
-            }
-
-            // Update password
-            user.password = password;
-
-            // Remove reset fields
-            user.resetPasswordToken = undefined;
-            user.resetPasswordExpire = undefined;
-
-            await user.save();
-
-            return res.status(200).json({
-                success: true,
-                message: "Password reset successful",
-            });
-
-        } catch (error) {
-
-            return res.status(500).json({
-                success: false,
-                message: error.message,
-            });
-        }
-    });
 });
+
+router.post("/forgot-password", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        // Generate random token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        // Save token + expiry in DB
+        user.resetPasswordToken = resetToken;
+
+        user.resetPasswordExpire =
+            Date.now() + 15 * 60 * 1000; // 15 mins
+
+        await user.save();
+
+        // Reset URL
+        const resetURL =
+            `http://localhost:5173/reset-password/${resetToken}`;
+
+        // Nodemailer transporter
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASSWORD,
+            },
+        });
+
+        // Mail options
+        const mailOptions = {
+            from: process.env.EMAIL,
+            to: user.email,
+            subject: "Password Reset",
+            html: `
+                <h2>Password Reset</h2>
+                <p>Click below link to reset password:</p>
+                <a href="${resetURL}">${resetURL}</a>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        return res.status(200).json({
+            success: true,
+            message: "Reset email sent",
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
+
+router.post("/reset-password/:token", async (req, res) => {
+
+    const { token } = req.params;
+
+    const { password } = req.body;
+
+    try {
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpire: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired token",
+            });
+        }
+
+        // Update password
+        user.password = password;
+
+        // Remove reset fields
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset successful",
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 export default router;
