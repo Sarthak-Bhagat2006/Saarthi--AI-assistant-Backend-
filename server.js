@@ -3,7 +3,7 @@ import express from "express";
 import cors from 'cors';
 import mongoose from 'mongoose';
 import chatRoutes from './Routes/chat.js';
-import registerRoutes from "./Routes/user.js";
+import registerRoutes from "./Routes/authRoutes.js";
 
 const app = express();
 const PORT = 8080;
