@@ -9,7 +9,7 @@ const getAPIResponce = async (message) => {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            model: "google/gemma-4-31b-it:free",
+            model: "openrouter/free",
             messages: [
                 { role: "user", content: message }
             ]
