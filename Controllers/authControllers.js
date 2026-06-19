@@ -74,6 +74,14 @@ export const login = async (req, res) => {
             });
         }
 
+        if (user.authProvider === "google") {
+            return res.status(400).json({
+                success: false,
+                message: "Please continue with Google Sign-In",
+            });
+
+        }
+
         const isMatch = await user.comparePassword(password);
 
         if (!isMatch) {
