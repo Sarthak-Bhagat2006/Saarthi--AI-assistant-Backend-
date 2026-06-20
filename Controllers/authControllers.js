@@ -39,7 +39,7 @@ export const signUp = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
-        console.log(token);
+
         return res.status(201).json({
             success: true,
             user,
@@ -130,7 +130,10 @@ export const guest = async (req, res) => {
             user: guestUser,
             token,
         });
+
     } catch (error) {
+        console.error("GUEST ERROR:", error);
+
         return res.status(500).json({
             success: false,
             message: error.message,
@@ -285,7 +288,6 @@ export const forgotPassword = async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log("MAIL SENT SUCCESSFULLY");
 
         return res.status(200).json({
             success: true,

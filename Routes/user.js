@@ -42,7 +42,6 @@ router.post("/signUp", async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
-        console.log(token);
         return res.status(201).json({
             success: true,
             user,
@@ -280,7 +279,7 @@ router.post("/forgot-password", async (req, res) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log("MAIL SENT SUCCESSFULLY");
+
 
         return res.status(200).json({
             success: true,
