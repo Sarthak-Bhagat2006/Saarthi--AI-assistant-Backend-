@@ -1,9 +1,10 @@
 import 'dotenv/config';
+import authRoutes from "./Routes/authRoute.js";
 import express from "express";
 import cors from 'cors';
 import mongoose from 'mongoose';
 import chatRoutes from './Routes/chat.js';
-import registerRoutes from "./Routes/authRoutes.js";
+
 
 const app = express();
 const PORT = 8080;
@@ -31,7 +32,7 @@ app.use(cors({
 
 // Routes
 app.use('/api', chatRoutes);
-app.use('/api/auth', registerRoutes);
+app.use('/api/auth', authRoutes);
 
 // Guest login route
 app.post('/auth/guest', (req, res) => {

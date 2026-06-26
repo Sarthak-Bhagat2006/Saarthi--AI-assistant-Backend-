@@ -1,3 +1,4 @@
+import express from "express";
 import User from "../Models/User.js";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
@@ -5,57 +6,136 @@ import "dotenv/config";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
+import bcrypt from "bcrypt";
+import sendVerificationEmail from "../Utils/sendEmail.js";
+
+const router = express.Router();
+
 // SIGN UP
-export const signUp = async (req, res) => {
+router.post("/signUp", async (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
         return res.status(400).json({
             success: false,
-            message: "Username, email, and password are required"
+            message: "Username, email and password are required",
         });
     }
 
     try {
-        const isUser = await User.findOne({ email });
+        let user = await User.findOne({ email });
 
-        if (isUser) {
-            return res.status(400).json({
-                success: false,
-                message: "User email already registered",
+        // ===========================
+        // Existing User
+        // ===========================
+        if (user) {
+
+            // Already verified
+            if (user.isVerified) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email already registered",
+                });
+            }
+
+            // Generate new OTP
+            const otp = Math.floor(
+                100000 + Math.random() * 900000
+            ).toString();
+
+            const hashedOTP = await bcrypt.hash(otp, 10);
+
+            // Update user details
+            user.username = username;
+            user.password = password;
+            user.verificationOTP = hashedOTP;
+            user.verificationOTPExpire =
+                Date.now() + 10 * 60 * 1000;
+
+            await user.save();
+
+            try {
+
+                await sendVerificationEmail(email, otp);
+
+            } catch (err) {
+
+                console.log(err);
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Failed to send verification email.",
+                });
+
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "OTP resent successfully.",
+                email,
             });
+
         }
 
-        const user = await User.create({
+        // ===========================
+        // New User
+        // ===========================
+
+        const otp = Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
+
+        const hashedOTP = await bcrypt.hash(otp, 10);
+
+        user = await User.create({
             username,
             email,
             password,
             role: "user",
             authProvider: "local",
+            isVerified: false,
+            verificationOTP: hashedOTP,
+            verificationOTPExpire:
+                Date.now() + 10 * 60 * 1000,
         });
 
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+        try {
+
+            await sendVerificationEmail(email, otp);
+
+        } catch (err) {
+
+            console.log(err);
+
+            // Remove user if email sending fails
+            await User.findByIdAndDelete(user._id);
+
+            return res.status(500).json({
+                success: false,
+                message: "Failed to send verification email.",
+            });
+
+        }
 
         return res.status(201).json({
             success: true,
-            user,
-            token,
+            message: "OTP sent successfully.",
+            email: user.email,
         });
+
     } catch (error) {
+
         console.log(error);
-        return res.status(400).json({
+
+        return res.status(500).json({
             success: false,
             message: error.message,
         });
-    }
-};
 
+    }
+});
 // LOGIN
-export const login = async (req, res) => {
+router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({
@@ -72,14 +152,6 @@ export const login = async (req, res) => {
                 success: false,
                 message: "User not found",
             });
-        }
-
-        if (user.authProvider === "google") {
-            return res.status(400).json({
-                success: false,
-                message: "Please continue with Google Sign-In",
-            });
-
         }
 
         const isMatch = await user.comparePassword(password);
@@ -108,10 +180,10 @@ export const login = async (req, res) => {
             message: error.message,
         });
     }
-};
+});
 
 // GUEST LOGIN
-export const guest = async (req, res) => {
+router.post("/guest", async (req, res) => {
     try {
         const guestUser = await User.create({
             username: `Guest-${uuidv4()}`,
@@ -130,20 +202,17 @@ export const guest = async (req, res) => {
             user: guestUser,
             token,
         });
-
     } catch (error) {
-        console.error("GUEST ERROR:", error);
-
         return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
-};
+});
 
 
 // GOOGLE LOGIN
-export const google = async (req, res) => {
+router.post("/google", async (req, res) => {
     const { code } = req.body;
 
     if (!code) {
@@ -213,6 +282,7 @@ export const google = async (req, res) => {
                 email,
                 role: "user",
                 authProvider: "google",
+                isVerified: true,
             });
         }
 
@@ -236,9 +306,9 @@ export const google = async (req, res) => {
         });
     }
 
-};
+});
 
-export const forgotPassword = async (req, res) => {
+router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
 
     try {
@@ -289,6 +359,7 @@ export const forgotPassword = async (req, res) => {
 
         await transporter.sendMail(mailOptions);
 
+
         return res.status(200).json({
             success: true,
             message: "Reset email sent",
@@ -300,10 +371,10 @@ export const forgotPassword = async (req, res) => {
             message: error.message,
         });
     }
-};
+});
 
 
-export const resetPassword = async (req, res) => {
+router.post("/reset-password/:token", async (req, res) => {
 
     const { token } = req.params;
 
@@ -344,5 +415,149 @@ export const resetPassword = async (req, res) => {
             message: error.message,
         });
     }
-};
+});
 
+router.post("/resend-otp", async (req, res) => {
+
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({
+            success: false,
+            message: "Email is required",
+        });
+    }
+
+    try {
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already verified",
+            });
+        }
+
+        const otp = Math.floor(
+            100000 + Math.random() * 900000
+        ).toString();
+
+        const hashedOTP = await bcrypt.hash(otp, 10);
+
+        user.verificationOTP = hashedOTP;
+        user.verificationOTPExpire = Date.now() + 10 * 60 * 1000;
+
+        await user.save();
+
+        await sendVerificationEmail(email, otp);
+
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent successfully",
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+});
+
+router.post("/verify-email", async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        return res.status(400).json({
+            success: false,
+            message: "Email and OTP are required",
+        });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already verified",
+            });
+        }
+
+        if (!user.verificationOTPExpire || user.verificationOTPExpire < Date.now()) {
+            return res.status(400).json({
+                success: false,
+                message: "OTP expired",
+            });
+        }
+
+        const validOTP = await bcrypt.compare(
+            otp,
+            user.verificationOTP
+        );
+
+        if (!validOTP) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP",
+            });
+        }
+
+        user.isVerified = true;
+        user.verificationOTP = undefined;
+        user.verificationOTPExpire = undefined;
+
+        await user.save();
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role,
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "7d",
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully",
+            user,
+            token,
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+});
+
+
+export default router;
