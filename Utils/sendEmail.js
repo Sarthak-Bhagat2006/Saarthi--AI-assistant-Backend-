@@ -1,23 +1,26 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD,
     },
+    tls: {
+        rejectUnauthorized: false,
+    },
 });
-
-/**
- * Send OTP verification email
- * @param {string} email
- * @param {string} otp
- */
 
 const sendVerificationEmail = async (email, otp) => {
     try {
+        // Verify SMTP connection
+        await transporter.verify();
+        console.log("✅ SMTP Connected");
+
         const mailOptions = {
-            from: `"Saarthi" <${process.env.EMAIL_USER}>`,
+            from: `"Saarthi" <${process.env.EMAIL}>`,
             to: email,
             subject: "Verify Your Saarthi Account",
             html: `
@@ -51,7 +54,7 @@ const sendVerificationEmail = async (email, otp) => {
 
         console.log("Verification email sent successfully");
     } catch (error) {
-        console.error("Email Error:", error.message);
+        console.error("Email Error:", error);
         throw new Error("Unable to send verification email");
     }
 };
