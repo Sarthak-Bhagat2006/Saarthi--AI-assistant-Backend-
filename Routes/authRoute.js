@@ -4,7 +4,9 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import "dotenv/config";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const { Brevo } = require("@getbrevo/brevo");
 
 import bcrypt from "bcrypt";
 import sendVerificationEmail from "../Utils/sendEmail.js";
@@ -336,28 +338,19 @@ router.post("/forgot-password", async (req, res) => {
         const resetURL =
             `http://localhost:5173/reset-password/${resetToken}`;
 
-        // Nodemailer transporter
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASSWORD,
-            },
-        });
+        const apiInstance = new Brevo.TransactionalEmailsApi();
+        apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
 
-        // Mail options
-        const mailOptions = {
-            from: process.env.EMAIL,
-            to: user.email,
-            subject: "Password Reset",
-            html: `
+        const sendSmtpEmail = new Brevo.SendSmtpEmail();
+        sendSmtpEmail.sender = { name: "Saarthi", email: "sarthakbhagat2006@gmail.com" };
+        sendSmtpEmail.to = [{ email: user.email }];
+        sendSmtpEmail.subject = "Password Reset";
+        sendSmtpEmail.htmlContent = `
                 <h2>Password Reset</h2>
                 <p>Click below link to reset password:</p>
                 <a href="${resetURL}">${resetURL}</a>
-            `,
-        };
-
-        await transporter.sendMail(mailOptions);
+            `;
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
 
 
         return res.status(200).json({
