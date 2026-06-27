@@ -6,7 +6,7 @@ import "dotenv/config";
 import crypto from "crypto";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-const { Brevo } = require("@getbrevo/brevo");
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
 import bcrypt from "bcrypt";
 import sendVerificationEmail from "../Utils/sendEmail.js";
@@ -338,20 +338,21 @@ router.post("/forgot-password", async (req, res) => {
         const resetURL =
             `http://localhost:5173/reset-password/${resetToken}`;
 
-        const apiInstance = new Brevo.TransactionalEmailsApi();
-        apiInstance.authentications["apiKey"].apiKey = process.env.BREVO_API_KEY;
+        const defaultClient = SibApiV3Sdk.ApiClient.instance;
+        const apiKey = defaultClient.authentications["api-key"];
+        apiKey.apiKey = process.env.BREVO_API_KEY;
 
-        const sendSmtpEmail = new Brevo.SendSmtpEmail();
+        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
         sendSmtpEmail.sender = { name: "Saarthi", email: "sarthakbhagat2006@gmail.com" };
         sendSmtpEmail.to = [{ email: user.email }];
         sendSmtpEmail.subject = "Password Reset";
         sendSmtpEmail.htmlContent = `
                 <h2>Password Reset</h2>
-                <p>Click below link to reset password:</p>
+                <p>Click below to reset your password:</p>
                 <a href="${resetURL}">${resetURL}</a>
             `;
         await apiInstance.sendTransacEmail(sendSmtpEmail);
-
 
         return res.status(200).json({
             success: true,
