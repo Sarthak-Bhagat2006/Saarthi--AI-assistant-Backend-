@@ -325,7 +325,7 @@ router.post("/forgot-password", async (req, res) => {
         user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+        const resetURL = `https://saarthi-ai-assistant-frontend.vercel.app/reset-password/${resetToken}`;
 
         const response = await fetch("https://api.brevo.com/v3/smtp/email", {
             method: "POST",
