@@ -17,7 +17,7 @@ const sendVerificationEmail = async (email, otp) => {
     try {
         // Verify SMTP connection
         await transporter.verify();
-        console.log("✅ SMTP Connected");
+        console.log("SMTP Connected");
 
         const mailOptions = {
             from: `"Saarthi" <${process.env.EMAIL}>`,
