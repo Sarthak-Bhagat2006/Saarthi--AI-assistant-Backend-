@@ -317,53 +317,45 @@ router.post("/forgot-password", async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-            });
+            return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Generate random token
         const resetToken = crypto.randomBytes(32).toString("hex");
-
-        // Save token + expiry in DB
         user.resetPasswordToken = resetToken;
-
-        user.resetPasswordExpire =
-            Date.now() + 15 * 60 * 1000; // 15 mins
-
+        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        // Reset URL
-        const resetURL =
-            `http://localhost:5173/reset-password/${resetToken}`;
+        const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
 
-        const defaultClient = SibApiV3Sdk.ApiClient.instance;
-        const apiKey = defaultClient.authentications["api-key"];
-        apiKey.apiKey = process.env.BREVO_API_KEY;
-
-        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.sender = { name: "Saarthi", email: "sarthakbhagat2006@gmail.com" };
-        sendSmtpEmail.to = [{ email: user.email }];
-        sendSmtpEmail.subject = "Password Reset";
-        sendSmtpEmail.htmlContent = `
-                <h2>Password Reset</h2>
-                <p>Click below to reset your password:</p>
-                <a href="${resetURL}">${resetURL}</a>
-            `;
-        await apiInstance.sendTransacEmail(sendSmtpEmail);
-
-        return res.status(200).json({
-            success: true,
-            message: "Reset email sent",
+        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "api-key": process.env.BREVO_API_KEY,
+            },
+            body: JSON.stringify({
+                sender: { name: "Saarthi", email: "sarthakbhagat2006@gmail.com" },
+                to: [{ email: user.email }],
+                subject: "Password Reset",
+                htmlContent: `
+                    <h2>Password Reset</h2>
+                    <p>Click below to reset your password:</p>
+                    <a href="${resetURL}">${resetURL}</a>
+                `,
+            }),
         });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error("Brevo error:", error);
+            throw new Error("Failed to send reset email");
+        }
+
+        return res.status(200).json({ success: true, message: "Reset email sent" });
 
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return res.status(500).json({ success: false, message: error.message });
     }
 });
 
